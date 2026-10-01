@@ -54,3 +54,18 @@ body[data-density="compact"] .question h3{font-size:17px;margin:5px 0 12px}
 body[data-density="compact"] footer{margin-top:22px;padding-top:12px}
 body[data-density="compact"] button{min-height:44px}
 @media(max-width:780px){body[data-density="compact"] .conversation{padding-left:0}body[data-density="compact"] h1{font-size:30px}}
+
+/* Policy introductions above the interview; consequences beside each answer. */
+.workspace{display:flex;flex-direction:column;gap:28px!important}
+#cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.conversation,body[data-density="compact"] .conversation{border-left:0;padding-left:0}
+.receipt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0 8px}
+.receipt{min-width:0;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text)}
+.receipt h4{font-size:12px;margin:0 0 10px;color:var(--muted)}
+.receipt blockquote{margin:0;font:16px/1.6 Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere}
+.receipt p{overflow-wrap:anywhere;white-space:pre-wrap}.receipt-status,.receipt details{font-size:12px}
+.receipt[data-company="A"]{border-top:3px solid var(--a)}.receipt[data-company="B"]{border-top:3px solid var(--b)}.receipt[data-company="C"]{border-top:3px solid var(--c)}
+.question-preview{margin-top:24px}.answer{margin-left:0}
+body[data-density="compact"] .question{padding:24px 0}
+body[data-density="compact"] .question h3{margin-bottom:18px;font-size:19px}
+@media(max-width:640px){#cards{grid-template-columns:1fr}.receipt-grid{gap:6px}.receipt{padding:8px}.receipt h4{font-size:11px}.receipt blockquote{font-size:14px}}
