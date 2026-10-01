@@ -1,17 +1,17 @@
 // Local read-only terms surface. Runtime admission is not connected in this app.
 const common = Object.freeze([
-  'This company is fictional. This preview runs locally; no answers are sent to a company and no background sharing occurs.',
-  'Only saved answers enter the preview. Unsubmitted keystrokes stay in the editor. Your private browser draft retains original answers and edits for all three previews, including Company C.',
-  'Sharing is your choice: approving quotes does not publish them. A download includes your approved quotes and only the company preview you select. Anyone you give that file to can keep a copy.',
-  'Clear this app’s drafts removes its saved interview data from this browser. It does not delete downloads, shared copies, or data on another device.'
+  'Collection: Only saved answers shall enter the company preview. Unsaved keystrokes shall not enter the preview.',
+  'Local storage: The participant’s private browser draft shall retain the original and saved revisions for all three previews. Restrictions on a company preview shall not delete that separate draft history.',
+  'Disclosure: No answer shall be transmitted to a company by this demonstration. Quote approval shall not publish an answer. A requested export shall contain approved quotes and only the company preview selected by the participant.',
+  'Deletion: “Clear this app’s drafts” shall remove this app’s saved interview data from the current browser. It shall not delete downloaded files, shared copies, or data on another device.'
 ]);
 const retention = {
-  A: 'We keep your saved answers verbatim until your first saved change. At that change we stop participating: we keep the pre-change answers, do not receive the replacement, and do not receive later answers. Leaving does not erase the earlier answers from this preview.',
-  B: 'We keep your current saved answers, the original wording, and every saved edit. Earlier wording remains available in this preview and is included if you choose to export Company B.',
-  C: 'We keep your current saved wording, the number of edits, and the cumulative character edit distance across saved changes. Earlier wording is omitted from this company preview and its export. This does not remove history from your separate private browser draft.'
+  A: 'Retention and withdrawal: The preview shall retain answers verbatim as saved before the first saved revision. On that revision, participation shall end. The replacement and all later answers shall be excluded. Previously retained answers shall remain in the preview and any requested Company A export.',
+  B: 'Retention and revisions: The preview shall retain the current answer, its original wording, and every saved revision. A revision shall not delete an earlier version. A requested Company B export shall include those earlier versions.',
+  C: 'Retention and revisions: The preview shall retain only current wording, the count of saved edits, and cumulative character edit distance. Earlier wording shall be excluded from the Company C preview and export. The participant’s separate private draft history shall remain governed by the local-storage rule below.'
 };
 export const policies = Object.freeze(Object.fromEntries(Object.entries(retention).map(([company, text]) => [company,
-  Object.freeze({id: `interview-company-${company}-privacy-v1`, company, paragraphs: Object.freeze([text, ...common])})
+  Object.freeze({id: `interview-company-${company}-privacy-v2`, company, paragraphs: Object.freeze([text, ...common])})
 ])));
 export function rejectTermsDiff() {
   throw new Error('Terms are read-only: content and presentation changes are refused.');
@@ -24,14 +24,19 @@ export function termsWidget(company) {
   node.dataset.surfaceDiffs = 'deny';
   node.contentEditable = 'false';
   const root = node.attachShadow({mode:'closed'});
-  const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/terms.css?v=9d9ffda70403aaa4';
+  const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/terms.css?v=9172cf9b068e8ab0';
   const details = document.createElement('details');
   const summary = document.createElement('summary'); summary.textContent = `Company ${company} · Privacy & terms`;
   details.append(summary);
+  const scope=document.createElement('p'); scope.textContent='Rules for this fictional company’s local preview.'; details.append(scope);
+  const rules=document.createElement('ol');
   for (const text of policy.paragraphs) {
-    const p = document.createElement('p'); p.textContent = text; details.append(p);
+    const rule=document.createElement('li');
+    const split=text.indexOf(':'); const heading=document.createElement('strong');heading.textContent=text.slice(0,split+1);
+    rule.append(heading,document.createTextNode(text.slice(split+1)));rules.append(rule);
   }
-  const label = document.createElement('small'); label.textContent = 'Read-only policy · v1'; details.append(label);
+  details.append(rules);
+  const label = document.createElement('small'); label.textContent = 'Read-only policy · v2'; details.append(label);
   root.append(css, details);
   // Disclosure navigation is allowed; editing and transform proposals are not.
   root.addEventListener('beforeinput', event => event.preventDefault());

@@ -1,14 +1,14 @@
-import {computeLocally} from '/browser-compute.js?v=9d9ffda70403aaa4';
-import {degree, encounter} from '/legibility.js?v=9d9ffda70403aaa4';
-import {termsWidget} from '/terms.js?v=9d9ffda70403aaa4';
+import {computeLocally} from '/browser-compute.js?v=9172cf9b068e8ab0';
+import {degree, encounter} from '/legibility.js?v=9172cf9b068e8ab0';
+import {termsWidget} from '/terms.js?v=9172cf9b068e8ab0';
 const $ = id => document.getElementById(id);
 const KEY = 'qune.interview.drafts.v1';
 let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') ?? .75);
 let config, store = { takes: [], active: -1 }, result = null, busy = false, storedSnapshot = null;
 const descriptions = [
-  ['A', 'Verbatim only. No edits. Leaves at your first change.', 'var(--a)'],
-  ['B', 'Edits allowed. Keeps the original and every edit.', 'var(--b)'],
-  ['C', 'Current wording, plus how often and how much you edited.', 'var(--c)']
+  ['A', [['Speak', ' in your own words. We '], ['keep', ' your saved answers as they are. We '], ['leave', ' when you first revise an answer.']], 'var(--a)'],
+  ['B', [['Revise', ' freely. We '], ['keep', ' your original and every saved edit—the whole conversation.']], 'var(--b)'],
+  ['C', [['Revise', ' freely. We '], ['keep', ' your latest wording and '], ['record', ' how often and how much you changed it.']], 'var(--c)']
 ];
 function element(tag, text, className) { const e = document.createElement(tag); if(text !== undefined) e.textContent = text; if(className) e.className = className; return e; }
 function button(text, fn, cls = '') { const b = element('button', text, cls); b.onclick = fn; return b; }
@@ -37,7 +37,9 @@ function renderCards() {
     card.append(element('span', ['01 / ON THE RECORD','02 / ROOM TO REVISE','03 / THE LATEST WORD'][index], 'policy-mark'));
     const chrome=element('div',undefined,'company-chrome');
     chrome.append(element('h3', `Company ${name}`),element('span',['Opaque','Extractive','Limited'][index],'company-name'));
-    card.append(chrome, element('p', description, 'description'));
+    const narrative=element('p',undefined,'description');
+    for(const [action,words] of description) narrative.append(element('strong',action),document.createTextNode(words));
+    card.append(chrome,narrative);
     const view = result?.policies[index];
     if(!view?.answers.length) card.append(element('p', 'Your answers will appear here.', 'empty'));
     for(const a of view?.answers || []) {
@@ -141,7 +143,7 @@ $('download').onclick = () => {
 };
 window.addEventListener('storage', e => { if(e.key===KEY) { notice('This interview changed in another tab. Reload before saving to avoid overwriting it.'); document.querySelectorAll('button').forEach(b=>b.disabled=true); } });
 try {
-  const response=await fetch('/config.json?v=9d9ffda70403aaa4'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
+  const response=await fetch('/config.json?v=9172cf9b068e8ab0'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
   $('publication-url').textContent=config.publication_url;
   const saved=localStorage.getItem(KEY); storedSnapshot=saved;
   if(saved) {
@@ -153,7 +155,7 @@ try {
 } catch(e) { notice(e.message); $('begin').disabled=true; }
 
 // Controls come from the compiled proto descriptors, not a hand-written type list.
-const controlResponse=await fetch('/theme-controls.json?v=9d9ffda70403aaa4');
+const controlResponse=await fetch('/theme-controls.json?v=9172cf9b068e8ab0');
 if(!controlResponse.ok) throw Error('Theme declarations could not load');
 const controls=await controlResponse.json();
 for(const spec of controls) {
