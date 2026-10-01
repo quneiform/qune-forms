@@ -3,7 +3,7 @@
 Quneic-published browser assets. Qune 0.3 permits only the interview form
 `43f421c2-dc61-4ea3-b7b5-28d73773af12`.
 
-Published address: https://app.qune.io/43f421c2-dc61-4ea3-b7b5-28d73773af12/
+Published address: https://form.qune.io/
 
 Answers remain in each participant's browser. Rust/Wasm performs the interview
 computation locally; there is no server response collector. Browser draft storage
