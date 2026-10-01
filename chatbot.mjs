@@ -1,4 +1,4 @@
-import {ChatSession, loadPreference, savePreference} from './session.mjs?v=23d17983c1a87e0b';
+import {ChatSession, loadPreference, savePreference} from './session.mjs?v=5fea13f54caaaca7';
 const node = (tag, text) => {const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function mountChatbot(container, {providers=[], profile='default', storage, onUse=null, scopeLabel='Only messages in this chat are sent.'}={}) {
   const title=node('h2','Talk it through'), disclosure=node('p'), settings=node('div'), provider=node('select'), model=node('select');
