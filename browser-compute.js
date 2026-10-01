@@ -2,7 +2,7 @@ let instance;
 const encoder=new TextEncoder(), decoder=new TextDecoder();
 export async function computeLocally(request) {
   if(!instance) {
-    const response=await fetch('/interview.wasm?v=d44c40b322b55f74');
+    const response=await fetch('/interview.wasm?v=53fed8affc1e082d');
     if(!response.ok) throw Error('Interview computation could not load. No answers were sent.');
     ({instance}=await WebAssembly.instantiate(await response.arrayBuffer(),{}));
   }
