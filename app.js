@@ -1,6 +1,6 @@
-import {computeLocally} from '/browser-compute.js?v=53fed8affc1e082d';
-import {degree, encounter} from '/legibility.js?v=53fed8affc1e082d';
-import {termsWidget} from '/terms.js?v=53fed8affc1e082d';
+import {computeLocally} from '/browser-compute.js?v=c1eac2477268ec67';
+import {degree, encounter} from '/legibility.js?v=c1eac2477268ec67';
+import {termsWidget} from '/terms.js?v=c1eac2477268ec67';
 const $ = id => document.getElementById(id);
 const KEY = 'qune.interview.drafts.v1';
 let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') ?? .75);
@@ -143,7 +143,7 @@ $('download').onclick = () => {
 };
 window.addEventListener('storage', e => { if(e.key===KEY) { notice('This interview changed in another tab. Reload before saving to avoid overwriting it.'); document.querySelectorAll('button').forEach(b=>b.disabled=true); } });
 try {
-  const response=await fetch('/config.json?v=53fed8affc1e082d'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
+  const response=await fetch('/config.json?v=c1eac2477268ec67'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
   $('publication-url').textContent=config.publication_url;
   const saved=localStorage.getItem(KEY); storedSnapshot=saved;
   if(saved) {
@@ -155,7 +155,7 @@ try {
 } catch(e) { notice(e.message); $('begin').disabled=true; }
 
 // Controls come from the compiled proto descriptors, not a hand-written type list.
-const controlResponse=await fetch('/theme-controls.json?v=53fed8affc1e082d');
+const controlResponse=await fetch('/theme-controls.json?v=c1eac2477268ec67');
 if(!controlResponse.ok) throw Error('Theme declarations could not load');
 const controls=await controlResponse.json();
 for(const spec of controls) {
@@ -164,7 +164,7 @@ for(const spec of controls) {
   if(spec.kind==='enum') {
     for(const choice of spec.choices) {
       const input=element('input');input.type='radio';input.name=spec.name;input.value=choice;input.checked=choice===spec.choices[0];
-      input.onchange=()=>{document.body.dataset.palette=choice;};labelInput(choice[0].toUpperCase()+choice.slice(1),input);
+      input.onchange=()=>{document.body.dataset[spec.name==='Density'?'density':'palette']=choice;};labelInput(choice[0].toUpperCase()+choice.slice(1),input);
     }
   } else if(spec.kind==='bool') {
     const input=element('input');input.type='checkbox';input.id='monotone';input.checked=spec.default;
