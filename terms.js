@@ -24,7 +24,7 @@ export function termsWidget(company) {
   node.dataset.surfaceDiffs = 'deny';
   node.contentEditable = 'false';
   const root = node.attachShadow({mode:'closed'});
-  const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/terms.css?v=d44c40b322b55f74';
+  const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/terms.css?v=53fed8affc1e082d';
   const details = document.createElement('details');
   const summary = document.createElement('summary'); summary.textContent = `Company ${company} · Privacy & terms`;
   details.append(summary);
