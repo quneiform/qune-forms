@@ -4,10 +4,10 @@
   "publisher": "quneic",
   "surface": "static-browser-wasm",
   "files": {
-    "index.html": "cb10aec7a0344b7fbe29c17abd02b8e88429f31aa2fc231575b8c43c1130a1be",
+    "index.html": "7825c54245da30041556e9859efc6a540546686f3ca5ae647e5e648f325d3d6c",
     "legibility.js": "b0acd4e04d8a241b7bc06dd4154a96a38f4550785181e9c758cc94742d7bdf87",
-    "CNAME": "9551edd11a7dac919eff5fa365ad19d2ef4b14da14edc0cc7a981959002100ec",
-    "config.json": "78d4987a29cd686e285b171f782e383bcbe14816a9ca29c1732c04de6e02df19",
+    "CNAME": "c679c03ec2c45aec8d84db454566bd5980c6f7f899715540af48629550864d53",
+    "config.json": "744776ba5cb17287dcec81ac465e28c5a3994681b854d3c01898a2f94107d766",
     "app.css": "1f940f2de3763c567ae49bb106cd4df02a9e2b345e80d6ab05245dc7df267c63",
     ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "browser-compute.js": "b0020f85af74b147cc80e17e15ef9438a5433110fe1f872114572987246293b1",
