@@ -50,7 +50,7 @@ function renderCards() {
   });
 }
 function editor(container, q, value = '') {
-  const input = element('textarea'); input.dataset.provides='text'; encounter(input,legibilityEnabled ? legibilityDegree : 0); input.value = value; input.maxLength = 4000; input.setAttribute('aria-label', `Answer question ${q+1}`); input.placeholder = 'In your own words…';
+  const input = element('textarea'); input.dataset.provides='text'; input.value = value; input.maxLength = 4000; input.setAttribute('aria-label', `Answer question ${q+1}`); input.placeholder = 'In your own words…';
   const controls = element('div', undefined, 'edit-actions'), count = element('span', `${value.length}/4000`, 'count');
   input.oninput = () => count.textContent = `${input.value.length}/4000`;
   const save = button(value ? 'Save edit' : 'Save & continue →', async () => {
@@ -58,7 +58,7 @@ function editor(container, q, value = '') {
     if(await compute({kind:'answer', question:q, text:input.value})) render(); else save.disabled = false;
   }, 'primary');
   controls.append(count, save); if(value) controls.append(button('Cancel', render, 'quiet'));
-  container.append(input, controls); return input;
+  container.append(input, controls); encounter(input,legibilityEnabled ? legibilityDegree : 0); return input;
 }
 function render() {
   renderCards();
@@ -94,10 +94,10 @@ function renderQuotes(suggest = false) {
   d.versions.forEach((versions, question) => {
     const text = versions.at(-1); if(!text) return;
     const section = element('div', undefined, 'quote-option'); section.append(element('strong', `Question ${question+1}`));
-    const area = element('textarea'); area.dataset.provides='text'; encounter(area,legibilityEnabled ? legibilityDegree : 0); area.setAttribute('aria-label', `Exact quote from answer ${question+1}`);
+    const area = element('textarea'); area.dataset.provides='text'; area.setAttribute('aria-label', `Exact quote from answer ${question+1}`);
     area.value = suggest ? (text.match(/[^.!?\n]+[.!?]?/u)?.[0]?.trim() || text) : text;
     section.append(area, button('Approve this excerpt', async () => { if(await compute({kind:'quote',question,text:area.value})) renderQuotes(); }));
-    $('quote-options').append(section);
+    $('quote-options').append(section); encounter(area,legibilityEnabled ? legibilityDegree : 0);
   });
   d.quotes.forEach((q,index) => { const row = element('p', q.text); row.append(button('Remove', async () => { if(await compute({kind:'remove_quote',index})) renderQuotes(); }, 'quiet')); $('approved').append(row); });
   if(!d.quotes.length) $('approved').append(element('p','No excerpts approved yet.'));
