@@ -1,0 +1,6 @@
+:host { display: block; margin-top: 18px; color-scheme: light; }
+details { background: #f2f3ee; color: #253028; border: 1px solid #b5bdb4; border-radius: 8px; padding: 12px 14px; font: 13px/1.65 system-ui, sans-serif; letter-spacing: normal; text-shadow: none; }
+summary { cursor: pointer; font-weight: 650; }
+summary:focus-visible { outline: 3px solid #375c40; outline-offset: 4px; }
+p { margin: 14px 0; }
+small { color: #45564a; }

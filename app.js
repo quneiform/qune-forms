@@ -1,5 +1,6 @@
 import {computeLocally} from '/browser-compute.js';
 import {degree, encounter} from '/legibility.js';
+import {termsWidget} from '/terms.js';
 const $ = id => document.getElementById(id);
 const KEY = 'qune.interview.drafts.v1';
 let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') || 0);
@@ -28,7 +29,6 @@ async function compute(action = null) {
     persist(); notice(); return true;
   } catch(e) { notice(e.message); return false; } finally { busy = false; }
 }
-function tos() { const d=element('details',undefined,'surface-tos'); d.dataset.role='legibility-tos'; d.append(element('summary','TOS · deny surface diffs'),element('p','Legibility only changes this encounter. Editing an answer is a separate, explicit action.')); return d; }
 function refreshEncounters() { document.querySelectorAll('[data-provides]').forEach(node => encounter(node,legibilityEnabled ? legibilityDegree : 0)); }
 function renderCards() {
   $('cards').replaceChildren();
@@ -46,7 +46,7 @@ function renderCards() {
       if(name === 'C' && a.edits) card.append(element('span', `${a.edits} edit${a.edits === 1 ? '' : 's'} · ${a.characters_changed} character changes`, 'tag'));
     }
     if(view?.left_at_question) card.append(element('p', `Left at question ${view.left_at_question}, when you edited an answer. Answers saved after that edit are excluded.`, 'exit'));
-    card.append(tos()); $('cards').append(card);
+    card.append(termsWidget(name).node); $('cards').append(card);
   });
 }
 function editor(container, q, value = '') {
@@ -81,7 +81,7 @@ function render() {
       meta.append(button('Edit', () => { answer.replaceChildren(); editor(answer,q,current).focus(); }, 'quiet'));
       answer.append(meta); section.append(answer);
     } else editor(section,q);
-    section.querySelector('h3').dataset.provides='text'; section.append(tos()); $('questions').append(section);
+    section.querySelector('h3').dataset.provides='text'; $('questions').append(section);
   }
   if(!d) $('questions').append(element('p', 'Three questions. You can revise any answer, take the interview again, and choose your quotes before exporting.', 'empty'));
   refreshEncounters();
@@ -150,12 +150,17 @@ try {
 
 $('hr-degree').value = legibilityDegree;
 $('hr-value').value = String(legibilityDegree);
-$('hr-enabled').onchange = e => { legibilityEnabled=e.target.checked; refreshEncounters(); };
+$('hr-enabled').onchange = e => { legibilityEnabled=$('hr-theme').checked && e.target.checked; refreshEncounters(); };
 $('hr-degree').oninput = e => {
   legibilityDegree=degree(e.target.value); $('hr-value').value=String(legibilityDegree);
   const url=new URL(location.href); url.searchParams.set('d',String(legibilityDegree)); history.replaceState(null,'',url); refreshEncounters();
 };
-$('hr-theme').onchange = e => document.body.classList.toggle('hradtoraed',e.target.checked);
+$('hr-theme').onchange = e => {
+  document.body.classList.toggle('hradtoraed',e.target.checked);
+  legibilityEnabled=e.target.checked;
+  $('hr-enabled').disabled=!e.target.checked; $('hr-enabled').checked=e.target.checked;
+  refreshEncounters();
+};
 $('hr-reset').onclick = () => {
   legibilityDegree=0; legibilityEnabled=false; $('hr-degree').value=0; $('hr-value').value='0'; $('hr-enabled').checked=false;
   const url=new URL(location.href); url.searchParams.set('d','0'); history.replaceState(null,'',url); refreshEncounters();
