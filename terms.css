@@ -4,3 +4,5 @@ summary { cursor: pointer; font-weight: 650; }
 summary:focus-visible { outline: 3px solid #375c40; outline-offset: 4px; }
 p { margin: 14px 0; }
 small { color: #45564a; }
+
+ol{padding-left:20px}li{padding-left:3px;margin:14px 0}strong{font-weight:700}
