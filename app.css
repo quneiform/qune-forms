@@ -26,5 +26,31 @@ body.monotone .policy[data-company="B"]{--tone:#444;--text:#242424;--muted:#555;
 
 .policy .description strong{font-weight:750;color:var(--text)}
 
-/* Use the company surface text palette for inherited answer text. */
+/* Resolve text at the surface so local palette tokens govern inherited text. */
 .policy{color:var(--text)}
+
+/* Density composes with the palette; terms and touch targets remain available. */
+body[data-density="compact"]{--space:12px}
+body[data-density="compact"] header{height:60px}
+body[data-density="compact"] main{max-width:1200px;padding:22px 4vw 16px}
+body[data-density="compact"] .intro{margin-bottom:18px}
+body[data-density="compact"] h1{font-size:36px;letter-spacing:-1.4px;margin:0 0 8px;line-height:1.15}
+body[data-density="compact"] .intro p{font-size:14px;margin:0}
+body[data-density="compact"] .terms{padding:16px;gap:20px;margin-bottom:18px}
+body[data-density="compact"] .terms .eyebrow{display:none}
+body[data-density="compact"] .terms h2{font-size:17px;margin:0}
+body[data-density="compact"] .terms p{margin:5px 0}
+body[data-density="compact"] .workspace{gap:24px}
+body[data-density="compact"] .conversation{padding-left:24px}
+body[data-density="compact"] .section-heading{padding:6px 0 12px}
+body[data-density="compact"] .policy{padding:16px;margin-bottom:14px}
+body[data-density="compact"] .policy .company-chrome{margin-bottom:8px;padding-bottom:8px}
+body[data-density="compact"] .policy .company-name{font-size:24px}
+body[data-density="compact"] .policy .policy-mark{display:none}
+body[data-density="compact"] .policy .description{font-size:13px;margin:4px 0 10px;padding-bottom:0}
+body[data-density="compact"] .policy blockquote{font-size:16px;margin:8px 0}
+body[data-density="compact"] .question{padding:14px 0}
+body[data-density="compact"] .question h3{font-size:17px;margin:5px 0 12px}
+body[data-density="compact"] footer{margin-top:22px;padding-top:12px}
+body[data-density="compact"] button{min-height:44px}
+@media(max-width:780px){body[data-density="compact"] .conversation{padding-left:0}body[data-density="compact"] h1{font-size:30px}}

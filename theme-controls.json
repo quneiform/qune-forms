@@ -1,1 +1,1 @@
-[{"choices":["green","blue","red"],"field":"color","kind":"enum","name":"ColorRotation"},{"default":false,"field":"enabled","kind":"bool","name":"Monotone"},{"default":75,"field":"strength","kind":"int32","max":100,"min":1,"name":"Hradtoraed"}]
+[{"choices":["compact","comfortable"],"field":"level","kind":"enum","name":"Density"},{"choices":["green","blue","red"],"field":"color","kind":"enum","name":"ColorRotation"},{"default":false,"field":"enabled","kind":"bool","name":"Monotone"},{"default":75,"field":"strength","kind":"int32","max":100,"min":1,"name":"Hradtoraed"}]
