@@ -25,3 +25,6 @@ main{margin-left:auto;margin-right:auto}#theme{display:flex;gap:8px;align-items:
 body.monotone .policy[data-company="B"]{--tone:#444;--text:#242424;--muted:#555;--line:#aaa;background:#e7e7e7}
 
 .policy .description strong{font-weight:750;color:var(--text)}
+
+/* Use the company surface text palette for inherited answer text. */
+.policy{color:var(--text)}
