@@ -1,6 +1,6 @@
-import {computeLocally} from '/browser-compute.js?v=c1eac2477268ec67';
-import {degree, encounter} from '/legibility.js?v=c1eac2477268ec67';
-import {termsWidget} from '/terms.js?v=c1eac2477268ec67';
+import {computeRequest, loadConfig} from '/host-adapter.js?v=db34a3d597e21e06';
+import {degree, encounter} from '/legibility.js?v=db34a3d597e21e06';
+import {termsWidget} from '/terms.js?v=db34a3d597e21e06';
 const $ = id => document.getElementById(id);
 const KEY = 'qune.interview.drafts.v1';
 let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') ?? .75);
@@ -25,7 +25,7 @@ async function compute(action = null) {
   if(busy) return false; busy = true;
   try {
     const draft = store.takes[store.active];
-    result = await computeLocally({draft, revision:draft.revision, action}); store.takes[store.active] = result.draft;
+    result = await computeRequest({draft, revision:draft.revision, action}); store.takes[store.active] = result.draft;
     persist(); notice(); return true;
   } catch(e) { notice(e.message); return false; } finally { busy = false; }
 }
@@ -40,30 +40,50 @@ function renderCards() {
     const narrative=element('p',undefined,'description');
     for(const [action,words] of description) narrative.append(element('strong',action),document.createTextNode(words));
     card.append(chrome,narrative);
-    const view = result?.policies[index];
-    if(!view?.answers.length) card.append(element('p', 'Your answers will appear here.', 'empty'));
-    for(const a of view?.answers || []) {
-      const wording = element('blockquote', a.text); wording.dataset.provides = 'text'; card.append(wording);
-      if(name === 'B' && a.earlier?.length) {
-        const details = element('details'); details.append(element('summary', `${a.earlier.length} earlier version${a.earlier.length === 1 ? '' : 's'} kept`));
-        a.earlier.forEach(t => { const old=element('p',t); old.dataset.provides='text'; details.append(old); }); card.append(details);
-      }
-      if(name === 'C' && a.edits) card.append(element('span', `${a.edits} edit${a.edits === 1 ? '' : 's'} · ${a.characters_changed} character changes`, 'tag'));
-    }
-    if(view?.left_at_question) card.append(element('p', `Left at question ${view.left_at_question}, when you edited an answer. Answers saved after that edit are excluded.`, 'exit'));
     card.append(termsWidget(name).node); $('cards').append(card);
   });
+}
+function receiptGrid(q, projection, pending = false) {
+  const grid=element('div',undefined,'receipt-grid');
+  grid.setAttribute('aria-label',pending?'Preview if you save':'Saved company records');
+  for(const [i,name] of ['A','B','C'].entries()) {
+    const cell=element('section',undefined,'receipt'); cell.dataset.company=name;
+    cell.append(element('h4',`Company ${name} · ${['Opaque','Extractive','Limited'][i]}`));
+    const policy=projection?.policies[i], answer=policy?.answers.find(a=>a.question===q);
+    if(policy?.left_at_question && name==='A') cell.append(element('p','No further answers received. Earlier wording stays on record.','receipt-status'));
+    const text=element('blockquote',answer?.text || 'Nothing yet.');text.dataset.provides='text';cell.append(text);
+    if(answer?.earlier?.length) {
+      const history=element('details');history.append(element('summary',`${answer.earlier.length} earlier version(s) retained`));
+      answer.earlier.forEach(t=>history.append(element('p',t)));cell.append(history);
+    }
+    if(name==='C' && answer?.edits) cell.append(element('p',`${answer.edits} edit(s) · ${answer.characters_changed} character changes`,'receipt-status'));
+    grid.append(cell);
+  }
+  return grid;
 }
 function editor(container, q, value = '') {
   const input = element('textarea'); input.dataset.provides='text'; input.value = value; input.maxLength = 4000; input.setAttribute('aria-label', `Answer question ${q+1}`); input.placeholder = 'In your own words…';
   const controls = element('div', undefined, 'edit-actions'), count = element('span', `${value.length}/4000`, 'count');
-  input.oninput = () => count.textContent = `${input.value.length}/4000`;
+  const preview=element('div',undefined,'question-preview');
+  preview.append(element('p','If you save · local preview','small-label'),receiptGrid(q,result,true));
+  let generation=0;
+  const update=async()=>{
+    count.textContent = `${input.value.length}/4000`;
+    const ticket=++generation, draft=store.takes[store.active], revision=draft.revision;
+    try {
+      const projected=input.value.trim()?await computeRequest({draft,revision,action:{kind:'answer',question:q,text:input.value}}):result;
+      if(ticket!==generation || !preview.isConnected || store.takes[store.active]!==draft || draft.revision!==revision) return;
+      preview.replaceChildren(element('p','If you save · local preview','small-label'),receiptGrid(q,projected,true));
+      preview.querySelectorAll('[data-provides]').forEach(n=>encounter(n,legibilityEnabled?legibilityDegree:0));
+    } catch(e) { if(ticket===generation && preview.isConnected) preview.replaceChildren(element('p',`Preview unavailable: ${e.message}`)); }
+  };
+  input.oninput=update;
   const save = button(value ? 'Save edit' : 'Save & continue →', async () => {
     save.disabled = true;
     if(await compute({kind:'answer', question:q, text:input.value})) render(); else save.disabled = false;
   }, 'primary');
   controls.append(count, save); if(value) controls.append(button('Cancel', render, 'quiet'));
-  container.append(input, controls); encounter(input,legibilityEnabled ? legibilityDegree : 0); return input;
+  container.append(input, controls, preview); encounter(input,legibilityEnabled ? legibilityDegree : 0); return input;
 }
 function render() {
   renderCards();
@@ -83,8 +103,8 @@ function render() {
       const answer = element('div', undefined, 'answer'), meta = element('div', undefined, 'answer-meta');
       const wording=element('p', current); wording.dataset.provides='text'; answer.append(wording);
       if(versions.length > 1) meta.append(element('span', `Edited ${versions.length-1}×`));
-      meta.append(button('Edit', () => { answer.replaceChildren(); editor(answer,q,current).focus(); }, 'quiet'));
-      answer.append(meta); section.append(answer);
+      meta.append(button('Edit', () => { section.querySelector('.receipt-grid')?.remove(); answer.replaceChildren(); editor(answer,q,current).focus(); }, 'quiet'));
+      answer.append(meta); section.append(answer,receiptGrid(q,result));
     } else editor(section,q);
     section.querySelector('h3').dataset.provides='text'; $('questions').append(section);
   }
@@ -143,7 +163,7 @@ $('download').onclick = () => {
 };
 window.addEventListener('storage', e => { if(e.key===KEY) { notice('This interview changed in another tab. Reload before saving to avoid overwriting it.'); document.querySelectorAll('button').forEach(b=>b.disabled=true); } });
 try {
-  const response=await fetch('/config.json?v=c1eac2477268ec67'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
+  config=await loadConfig();
   $('publication-url').textContent=config.publication_url;
   const saved=localStorage.getItem(KEY); storedSnapshot=saved;
   if(saved) {
@@ -155,7 +175,7 @@ try {
 } catch(e) { notice(e.message); $('begin').disabled=true; }
 
 // Controls come from the compiled proto descriptors, not a hand-written type list.
-const controlResponse=await fetch('/theme-controls.json?v=c1eac2477268ec67');
+const controlResponse=await fetch('/theme-controls.json?v=db34a3d597e21e06');
 if(!controlResponse.ok) throw Error('Theme declarations could not load');
 const controls=await controlResponse.json();
 for(const spec of controls) {
