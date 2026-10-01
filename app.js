@@ -29,13 +29,15 @@ async function compute(action = null) {
     persist(); notice(); return true;
   } catch(e) { notice(e.message); return false; } finally { busy = false; }
 }
-function refreshEncounters() { document.querySelectorAll('[data-provides]').forEach(node => encounter(node,legibilityEnabled ? legibilityDegree : 0)); }
+function refreshEncounters() { document.querySelectorAll('main h1, main h2, main h3, main p, main blockquote, .company-name').forEach(node=>{node.dataset.provides='text';}); document.querySelectorAll('[data-provides]').forEach(node => encounter(node,legibilityEnabled ? legibilityDegree : 0)); }
 function renderCards() {
   $('cards').replaceChildren();
   descriptions.forEach(([name, description, tone], index) => {
     const card = element('article', undefined, 'policy'); card.style.setProperty('--tone', tone); card.dataset.company=name;
     card.append(element('span', ['01 / ON THE RECORD','02 / ROOM TO REVISE','03 / THE LATEST WORD'][index], 'policy-mark'));
-    card.append(element('h3', `Company ${name}`), element('p', description, 'description'));
+    const chrome=element('div',undefined,'company-chrome');
+    chrome.append(element('h3', `Company ${name}`),element('span',['Opaque','Extractive','Limited'][index],'company-name'));
+    card.append(chrome, element('p', description, 'description'));
     const view = result?.policies[index];
     if(!view?.answers.length) card.append(element('p', 'Your answers will appear here.', 'empty'));
     for(const a of view?.answers || []) {
@@ -149,22 +151,34 @@ try {
   render();
 } catch(e) { notice(e.message); $('begin').disabled=true; }
 
-$('hr-degree').value = legibilityDegree;
-$('hr-value').value = String(legibilityDegree);
-$('hr-degree').oninput = e => {
-  legibilityDegree=degree(e.target.value); $('hr-value').value=String(legibilityDegree);
-  const url=new URL(location.href); url.searchParams.set('d',String(legibilityDegree)); history.replaceState(null,'',url); refreshEncounters();
-};
-$('hr-theme').onchange = e => {
-  legibilityEnabled=e.target.checked;
-  if(legibilityEnabled && legibilityDegree===0) {
-    legibilityDegree=.75; $('hr-degree').value=.75; $('hr-value').value='0.75';
-  }
-  refreshEncounters();
-};
-$('hr-reset').onclick = () => {
-  legibilityDegree=0; $('hr-degree').value=0; $('hr-value').value='0';
-  const url=new URL(location.href); url.searchParams.set('d','0'); history.replaceState(null,'',url); refreshEncounters();
-};
-$('encounter-controls').onclick = () => { $('legibility-panel').open = !$('legibility-panel').open; if($('legibility-panel').open) $('legibility-panel').scrollIntoView({behavior:'smooth'}); };
+// Controls come from the compiled proto descriptors, not a hand-written type list.
+const controlResponse=await fetch('/theme-controls.json');
+if(!controlResponse.ok) throw Error('Theme declarations could not load');
+const controls=await controlResponse.json();
+for(const spec of controls) {
+  const group=element('fieldset'); group.append(element('legend',spec.name==='ColorRotation'?'Color':spec.name));
+  const labelInput=(text,input)=>{const label=element('label',text);label.prepend(input);group.append(label);};
+  if(spec.kind==='enum') {
+    for(const choice of spec.choices) {
+      const input=element('input');input.type='radio';input.name=spec.name;input.value=choice;input.checked=choice===spec.choices[0];
+      input.onchange=()=>{document.body.dataset.palette=choice;};labelInput(choice[0].toUpperCase()+choice.slice(1),input);
+    }
+  } else if(spec.kind==='bool') {
+    const input=element('input');input.type='checkbox';input.id='monotone';input.checked=spec.default;
+    input.onchange=()=>document.body.classList.toggle('monotone',input.checked);labelInput('Monotone',input);
+  } else if(spec.kind==='int32') {
+    const enabled=element('input');enabled.type='checkbox';enabled.id='hr-theme';labelInput('Hradtoraed',enabled);
+    const slider=element('input');slider.type='range';slider.id='hr-degree';slider.min=spec.min;slider.max=spec.max;slider.step=1;slider.value=spec.default;
+    slider.setAttribute('aria-label','Hradtoraed strength');
+    const output=element('output',String(spec.default));output.id='hr-value';
+    const update=()=>{
+      const value=Number(slider.value);
+      if(!Number.isInteger(value)||value<spec.min||value>spec.max) throw Error('Theme strength outside declared range');
+      output.value=String(value);legibilityDegree=value/100;legibilityEnabled=enabled.checked;refreshEncounters();
+    };
+    enabled.onchange=update;slider.oninput=update;group.append(slider,output);
+    group.append(button('Ordinary text',()=>{enabled.checked=false;update();},'quiet'));
+  } else throw Error('Unsupported theme declaration');
+  $('theme-controls').append(group);
+}
 refreshEncounters();
