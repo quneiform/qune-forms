@@ -9,7 +9,7 @@ export function mountBasicApp({nav, appearance, ai, aiLabel='AI'}) {
     let button=nav.querySelector(`[popovertarget="${CSS.escape(panel.id)}"]`);
     if(!button){button=document.createElement('button');button.textContent=label;button.setAttribute('popovertarget',panel.id);nav.append(button);mounted.push(button);}
     button.setAttribute('aria-label',label);button.setAttribute('aria-expanded','false');
-    const toggle=e=>{button.setAttribute('aria-expanded',String(e.newState==='open'));};panel.addEventListener('toggle',toggle);mounted.push(()=>panel.removeEventListener('toggle',toggle));
+    const toggle=e=>{button.setAttribute('aria-expanded',String(e.newState==='open'));if(e.newState==='closed' && (panel.contains(document.activeElement)||document.activeElement===document.body))button.focus();};panel.addEventListener('toggle',toggle);mounted.push(()=>panel.removeEventListener('toggle',toggle));
   }
   return {dispose(){for(const item of mounted)typeof item==='function'?item():item.remove();}};
 }

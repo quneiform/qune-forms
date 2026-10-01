@@ -1,7 +1,7 @@
 // The host supplies an authorized transport; adapters never obtain credentials.
 // Transport accepts a protocol request and returns a Fetch Response.
 export function providerAdapter({id, label, models, local=false, destination, protocol, transport}) {
-  if(!['openai','claude','gemini','ollama'].includes(protocol))throw Error('Unsupported protocol');
+  if(!['openai','claude','gemini','ollama','chat-completions'].includes(protocol))throw Error('Unsupported protocol');
   return {id,label,models,local,destination,async *stream({model,messages,signal}) {
     if(!models.includes(model))throw Error('Model unavailable');
     const body=protocol==='openai'?{model,input:messages,stream:true,store:false}
@@ -14,7 +14,7 @@ export function providerAdapter({id, label, models, local=false, destination, pr
     let completed=false;
     for await(const data of records(response.body,protocol==='ollama')) {
       if(signal.aborted)throw new DOMException('Stopped','AbortError');
-      if(data==='[DONE]')continue;
+      if(data==='[DONE]'){if(protocol==='chat-completions')completed=true;continue;}
       const event=JSON.parse(data);
       if(event.error || event.type==='error' || ['response.failed','response.incomplete'].includes(event.type))throw Error('Provider reported an incomplete or failed response');
       if(protocol==='openai') {
@@ -28,6 +28,10 @@ export function providerAdapter({id, label, models, local=false, destination, pr
         if(event.promptFeedback?.blockReason)throw Error('Provider blocked the prompt');
         for(const part of candidate?.content?.parts || [])if(part.text && !part.thought)yield part.text;
         if(candidate?.finishReason){if(candidate.finishReason!=='STOP')throw Error(`Provider stopped: ${candidate.finishReason}`);completed=true;}
+      } else if(protocol==='chat-completions') {
+        const choice=event.choices?.[0];
+        if(choice?.delta?.content)yield choice.delta.content;
+        if(choice?.finish_reason && choice.finish_reason!=='stop')throw Error(`Provider stopped: ${choice.finish_reason}`);
       } else {
         if(event.message?.content)yield event.message.content;
         if(event.done)completed=true;

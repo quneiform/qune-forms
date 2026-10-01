@@ -1,6 +1,6 @@
-import {mountBasicApp} from '/basicapp.mjs?v=23d17983c1a87e0b';
-import {mountChatbot} from '/chatbot.mjs?v=23d17983c1a87e0b';
-import {providers} from '/ai-host.js?v=23d17983c1a87e0b';
+import {mountBasicApp} from '/basicapp.mjs?v=5fea13f54caaaca7';
+import {mountChatbot} from '/chatbot.mjs?v=5fea13f54caaaca7';
+import {providers} from '/ai-host.js?v=5fea13f54caaaca7';
 const ai=document.getElementById('ai-panel');
 mountBasicApp({nav:document.querySelector('.header-actions'),appearance:document.getElementById('theme-panel'),ai});
 mountChatbot(ai,{providers,scopeLabel:'Only this chat is sent. Your interview answers are not included.',profile:'primer-interview',onUse(text){
