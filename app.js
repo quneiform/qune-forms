@@ -1,6 +1,6 @@
-import {computeLocally} from '/browser-compute.js';
-import {degree, encounter} from '/legibility.js';
-import {termsWidget} from '/terms.js';
+import {computeLocally} from '/browser-compute.js?v=9d9ffda70403aaa4';
+import {degree, encounter} from '/legibility.js?v=9d9ffda70403aaa4';
+import {termsWidget} from '/terms.js?v=9d9ffda70403aaa4';
 const $ = id => document.getElementById(id);
 const KEY = 'qune.interview.drafts.v1';
 let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') ?? .75);
@@ -125,7 +125,8 @@ $('clear').onclick = () => {
   try { localStorage.removeItem(KEY); storedSnapshot=null; store={takes:[],active:-1}; result=null; $('agree').checked=false; $('begin').disabled=true; $('saved').textContent='Drafts cleared'; render(); notice(); }
   catch(e) { notice(`Could not clear drafts: ${e.message}`); }
 };
-$('theme').onclick = () => document.body.classList.toggle('light');
+document.querySelectorAll('[name=appearance]').forEach(input=>{input.onchange=()=>document.body.classList.toggle('light',input.value==='light');});
+$('theme-panel').addEventListener('toggle',event=>$('theme').setAttribute('aria-expanded',String(event.newState==='open')));
 $('close-quotes').onclick = () => { $('quotes').close(); render(); };
 $('suggest').onclick = () => renderQuotes(true);
 $('publish').onclick = () => $('publication').showModal();
@@ -140,7 +141,7 @@ $('download').onclick = () => {
 };
 window.addEventListener('storage', e => { if(e.key===KEY) { notice('This interview changed in another tab. Reload before saving to avoid overwriting it.'); document.querySelectorAll('button').forEach(b=>b.disabled=true); } });
 try {
-  const response=await fetch('/config.json'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
+  const response=await fetch('/config.json?v=9d9ffda70403aaa4'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
   $('publication-url').textContent=config.publication_url;
   const saved=localStorage.getItem(KEY); storedSnapshot=saved;
   if(saved) {
@@ -152,11 +153,11 @@ try {
 } catch(e) { notice(e.message); $('begin').disabled=true; }
 
 // Controls come from the compiled proto descriptors, not a hand-written type list.
-const controlResponse=await fetch('/theme-controls.json');
+const controlResponse=await fetch('/theme-controls.json?v=9d9ffda70403aaa4');
 if(!controlResponse.ok) throw Error('Theme declarations could not load');
 const controls=await controlResponse.json();
 for(const spec of controls) {
-  const group=element('fieldset'); group.append(element('legend',spec.name==='ColorRotation'?'Color':spec.name));
+  const group=element('fieldset'); group.dataset.kind=spec.kind; group.append(element('legend',spec.name==='ColorRotation'?'Color':spec.name));
   const labelInput=(text,input)=>{const label=element('label',text);label.prepend(input);group.append(label);};
   if(spec.kind==='enum') {
     for(const choice of spec.choices) {
@@ -165,9 +166,10 @@ for(const spec of controls) {
     }
   } else if(spec.kind==='bool') {
     const input=element('input');input.type='checkbox';input.id='monotone';input.checked=spec.default;
-    input.onchange=()=>document.body.classList.toggle('monotone',input.checked);labelInput('Monotone',input);
+    input.onchange=()=>document.body.classList.toggle('monotone',input.checked);labelInput('Use a single neutral palette',input);
   } else if(spec.kind==='int32') {
-    const enabled=element('input');enabled.type='checkbox';enabled.id='hr-theme';labelInput('Hradtoraed',enabled);
+    const enabled=element('input');enabled.type='checkbox';enabled.id='hr-theme';labelInput('Rearrange letters',enabled);
+    group.append(element('p','A little harder to read. Still exactly your words.','theme-description'));
     const slider=element('input');slider.type='range';slider.id='hr-degree';slider.min=spec.min;slider.max=spec.max;slider.step=1;slider.value=spec.default;
     slider.setAttribute('aria-label','Hradtoraed strength');
     const output=element('output',String(spec.default));output.id='hr-value';
@@ -176,7 +178,8 @@ for(const spec of controls) {
       if(!Number.isInteger(value)||value<spec.min||value>spec.max) throw Error('Theme strength outside declared range');
       output.value=String(value);legibilityDegree=value/100;legibilityEnabled=enabled.checked;refreshEncounters();
     };
-    enabled.onchange=update;slider.oninput=update;group.append(slider,output);
+    enabled.onchange=update;slider.oninput=update;
+    const strength=element('div',undefined,'theme-strength');strength.append(slider,output);group.append(strength);
     group.append(button('Ordinary text',()=>{enabled.checked=false;update();},'quiet'));
   } else throw Error('Unsupported theme declaration');
   $('theme-controls').append(group);
