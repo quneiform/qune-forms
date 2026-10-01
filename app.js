@@ -3,7 +3,7 @@ import {degree, encounter} from '/legibility.js';
 import {termsWidget} from '/terms.js';
 const $ = id => document.getElementById(id);
 const KEY = 'qune.interview.drafts.v1';
-let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') || 0);
+let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') ?? .75);
 let config, store = { takes: [], active: -1 }, result = null, busy = false, storedSnapshot = null;
 const descriptions = [
   ['A', 'Verbatim only. No edits. Leaves at your first change.', 'var(--a)'],
@@ -33,7 +33,8 @@ function refreshEncounters() { document.querySelectorAll('[data-provides]').forE
 function renderCards() {
   $('cards').replaceChildren();
   descriptions.forEach(([name, description, tone], index) => {
-    const card = element('article', undefined, 'policy'); card.style.setProperty('--tone', tone);
+    const card = element('article', undefined, 'policy'); card.style.setProperty('--tone', tone); card.dataset.company=name;
+    card.append(element('span', ['01 / ON THE RECORD','02 / ROOM TO REVISE','03 / THE LATEST WORD'][index], 'policy-mark'));
     card.append(element('h3', `Company ${name}`), element('p', description, 'description'));
     const view = result?.policies[index];
     if(!view?.answers.length) card.append(element('p', 'Your answers will appear here.', 'empty'));
@@ -156,13 +157,12 @@ $('hr-degree').oninput = e => {
   const url=new URL(location.href); url.searchParams.set('d',String(legibilityDegree)); history.replaceState(null,'',url); refreshEncounters();
 };
 $('hr-theme').onchange = e => {
-  document.body.classList.toggle('hradtoraed',e.target.checked);
   legibilityEnabled=e.target.checked;
   $('hr-enabled').disabled=!e.target.checked; $('hr-enabled').checked=e.target.checked;
   refreshEncounters();
 };
 $('hr-reset').onclick = () => {
-  legibilityDegree=0; legibilityEnabled=false; $('hr-degree').value=0; $('hr-value').value='0'; $('hr-enabled').checked=false;
+  legibilityDegree=0; $('hr-degree').value=0; $('hr-value').value='0';
   const url=new URL(location.href); url.searchParams.set('d','0'); history.replaceState(null,'',url); refreshEncounters();
 };
 $('encounter-controls').onclick = () => { $('legibility-panel').open = !$('legibility-panel').open; if($('legibility-panel').open) $('legibility-panel').scrollIntoView({behavior:'smooth'}); };
