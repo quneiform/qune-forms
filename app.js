@@ -1,12 +1,12 @@
-import {computeLocally} from '/browser-compute.js?v=9172cf9b068e8ab0';
-import {degree, encounter} from '/legibility.js?v=9172cf9b068e8ab0';
-import {termsWidget} from '/terms.js?v=9172cf9b068e8ab0';
+import {computeLocally} from '/browser-compute.js?v=d44c40b322b55f74';
+import {degree, encounter} from '/legibility.js?v=d44c40b322b55f74';
+import {termsWidget} from '/terms.js?v=d44c40b322b55f74';
 const $ = id => document.getElementById(id);
 const KEY = 'qune.interview.drafts.v1';
 let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') ?? .75);
 let config, store = { takes: [], active: -1 }, result = null, busy = false, storedSnapshot = null;
 const descriptions = [
-  ['A', [['Speak', ' in your own words. We '], ['keep', ' your saved answers as they are. We '], ['leave', ' when you first revise an answer.']], 'var(--a)'],
+  ['A', [['Speak', ' in your own words. We '], ['keep', ' your saved answers as they are.']], 'var(--a)'],
   ['B', [['Revise', ' freely. We '], ['keep', ' your original and every saved edit—the whole conversation.']], 'var(--b)'],
   ['C', [['Revise', ' freely. We '], ['keep', ' your latest wording and '], ['record', ' how often and how much you changed it.']], 'var(--c)']
 ];
@@ -143,7 +143,7 @@ $('download').onclick = () => {
 };
 window.addEventListener('storage', e => { if(e.key===KEY) { notice('This interview changed in another tab. Reload before saving to avoid overwriting it.'); document.querySelectorAll('button').forEach(b=>b.disabled=true); } });
 try {
-  const response=await fetch('/config.json?v=9172cf9b068e8ab0'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
+  const response=await fetch('/config.json?v=d44c40b322b55f74'); if(!response.ok) throw Error('Configuration unavailable'); config=await response.json();
   $('publication-url').textContent=config.publication_url;
   const saved=localStorage.getItem(KEY); storedSnapshot=saved;
   if(saved) {
@@ -155,7 +155,7 @@ try {
 } catch(e) { notice(e.message); $('begin').disabled=true; }
 
 // Controls come from the compiled proto descriptors, not a hand-written type list.
-const controlResponse=await fetch('/theme-controls.json?v=9172cf9b068e8ab0');
+const controlResponse=await fetch('/theme-controls.json?v=d44c40b322b55f74');
 if(!controlResponse.ok) throw Error('Theme declarations could not load');
 const controls=await controlResponse.json();
 for(const spec of controls) {
