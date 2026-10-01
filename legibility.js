@@ -61,8 +61,17 @@ export function encounter(node, value) {
     }
     state.d=d; state.paint();
   } else {
-    if(!sources.has(node)) sources.set(node,node.textContent);
-    node.textContent=rearrange(sources.get(node),d);
+    const renderText=part=>{
+      if(!sources.has(part)) sources.set(part,part.textContent);
+      part.textContent=rearrange(sources.get(part),d);
+    };
+    if(node.childNodes) {
+      const walk=parent=>{for(const child of parent.childNodes) {
+        if(child.nodeType===3) renderText(child);
+        else if(child.nodeType===1 && !child.matches('button,input,textarea,select,[data-role=terms],[data-role=legibility-tos]')) walk(child);
+      }};
+      walk(node);
+    } else renderText(node);
   }
   return true;
 }
