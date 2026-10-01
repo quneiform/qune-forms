@@ -1,6 +1,6 @@
-import {computeRequest, loadConfig} from '/host-adapter.js?v=db34a3d597e21e06';
-import {degree, encounter} from '/legibility.js?v=db34a3d597e21e06';
-import {termsWidget} from '/terms.js?v=db34a3d597e21e06';
+import {computeRequest, loadConfig} from '/host-adapter.js?v=23d17983c1a87e0b';
+import {degree, encounter} from '/legibility.js?v=23d17983c1a87e0b';
+import {termsWidget} from '/terms.js?v=23d17983c1a87e0b';
 const $ = id => document.getElementById(id);
 const KEY = 'qune.interview.drafts.v1';
 let legibilityEnabled = false, legibilityDegree = degree(new URL(location.href).searchParams.get('d') ?? .75);
@@ -175,7 +175,7 @@ try {
 } catch(e) { notice(e.message); $('begin').disabled=true; }
 
 // Controls come from the compiled proto descriptors, not a hand-written type list.
-const controlResponse=await fetch('/theme-controls.json?v=db34a3d597e21e06');
+const controlResponse=await fetch('/theme-controls.json?v=23d17983c1a87e0b');
 if(!controlResponse.ok) throw Error('Theme declarations could not load');
 const controls=await controlResponse.json();
 for(const spec of controls) {
