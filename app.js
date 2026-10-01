@@ -151,14 +151,15 @@ try {
 
 $('hr-degree').value = legibilityDegree;
 $('hr-value').value = String(legibilityDegree);
-$('hr-enabled').onchange = e => { legibilityEnabled=$('hr-theme').checked && e.target.checked; refreshEncounters(); };
 $('hr-degree').oninput = e => {
   legibilityDegree=degree(e.target.value); $('hr-value').value=String(legibilityDegree);
   const url=new URL(location.href); url.searchParams.set('d',String(legibilityDegree)); history.replaceState(null,'',url); refreshEncounters();
 };
 $('hr-theme').onchange = e => {
   legibilityEnabled=e.target.checked;
-  $('hr-enabled').disabled=!e.target.checked; $('hr-enabled').checked=e.target.checked;
+  if(legibilityEnabled && legibilityDegree===0) {
+    legibilityDegree=.75; $('hr-degree').value=.75; $('hr-value').value='0.75';
+  }
   refreshEncounters();
 };
 $('hr-reset').onclick = () => {
